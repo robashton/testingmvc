@@ -39,19 +39,21 @@
  - The cost of trying to apply TDD in most dev teams is too high
  - It is better to focus on reaping real returns, than to listen to some guy off the internet or at a conference (sorry)
  - Practise TDD outside of work, but do not inflict it on the vast majority of your codebase
+ - TDD itself is pretty good for working on the unknown or small logical problems
  - TDD itself has a lot of value when used correctly by experts or TDD consultants
 
 - Assumptions
  - You do not have the liberty to adopt a spike and stabilise approach
  - You are not working at a start-up
  - You are working at "standard enterprise company 030035B" and want to do it better
- - If you want to reach out about these assumptions, catch me after over beer
 
 ### 
+
 BOOM EXPLOSION
 
 So, you are starting a new project.
 
+- We are using ASP.NET MVC (this is a massive constraint)
 - Database as an implementation detail
 - Slow things as an implementation detail
 - Everything else is fair game
@@ -84,7 +86,6 @@ Write a test.
 - I have not decided to use my favourite mocking framework
 - Etc
 
-
 ### My preferred testing tools
 
 - PhantomJS
@@ -106,7 +107,6 @@ Let's use XSP2 and make that happen
 
 Success.
 
-
 # Putting the ponies in a stable (persistence)
 
 # Giving our ponies houses (relationships)
@@ -121,9 +121,44 @@ Success.
 - Write an endpoint that you can ping to clear the memory
 - *for now*, it's too slow to tear up/down ASP.NET MVC - this will change
 
-# Anyway the project is finished, now what?
+# Anyway the feature is finished, now what?
 
 - Where to store the ponies?
 - Where to put the files?
 
 Let's re-use our tests on the live system...
+
+
+# Great, that's how we build stuff, how about some common ASP.NET MVC testing problems
+
+- Trying to write unit tests for infrastructure concerns
+ - Filters
+ - Validators
+ - Binders
+
+- Common issues with this
+
+  var context = new Mock<HttpContextBase>()
+  var server = new Mock<HttpContextServerBase>()
+  var controllerContext = new Mock<ControllerContextBase>()
+
+  context.Get(x=>x.Server, server)
+  controllerContext.Get(x=>x.Context, context)
+
+  // etc
+
+- No, using an auto-mocking thing to do
+
+  var controllerContext = new CrazyAutoMock<ControllerContextBase>()
+
+Is not a solution
+
+- If you have complicated logic (think resource authorization), then pull it out and write it independently of ASP.NET MVC and consume it
+- If it's not complicated, then move on and make sure your end-to-end tests cover it
+
+
+There are two reasons to drop down to a lower level test
+- They're faster
+- You need more feedback
+
+The first one is wrong, make your outside tests faster - inverting the testing pyramid is a false goal.
